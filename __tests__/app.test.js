@@ -18,8 +18,9 @@ describe("GET /api/does-not-exist", () => {
         return request(app)
             .get("/api/does-not-exist")
             .expect(404)
-            .then(({ res: { statusMessage } }) => {
-                expect(statusMessage).toBe("Not Found");
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Not found");
+                expect(desc).toBe("Endpoint does not exist");
             });
     });
 });
