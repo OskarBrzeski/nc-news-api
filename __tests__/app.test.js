@@ -26,6 +26,17 @@ describe("GET /api/does-not-exist", () => {
     });
 });
 
+describe("GET /api", () => {
+    test("200: returns the object in endpoints.json", () => {
+        return request(app)
+            .get("/api")
+            .expect(200)
+            .then(({ body: {endpoints} }) => {
+                expect(endpoints).toEqual(endpointsData);
+            });
+    });
+});
+
 describe("GET /api/topics", () => {
     test("200: returns all topics as objects with correct attributes", () => {
         return request(app)
@@ -40,17 +51,6 @@ describe("GET /api/topics", () => {
                         slug: expect.any(String),
                     });
                 });
-            });
-    });
-});
-
-describe("GET /api", () => {
-    test("200: returns the object in endpoints.json", () => {
-        return request(app)
-            .get("/api")
-            .expect(200)
-            .then(({ body: {endpoints} }) => {
-                expect(endpoints).toEqual(endpointsData);
             });
     });
 });
