@@ -55,6 +55,73 @@ describe("GET /api/topics", () => {
     });
 });
 
+describe("GET /api/articles", () => {
+    test("200: returns array of all articles", () => {
+        return request(app)
+            .get("/api/articles")
+            .expect(200)
+            .then(({ body: { articles } }) => {
+                expect(articles).toHaveLength(13);
+
+                articles.forEach((article) => {
+                    expect(article).toMatchObject({
+                        author: expect.any(String),
+                        title: expect.any(String),
+                        article_id: expect.any(Number),
+                        topic: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number),
+                        article_img_url: expect.any(String),
+                        comment_count: expect.any(Number),
+                    });
+
+                    expect(article).not.toHaveProperty("body");
+                });
+            });
+    });
+
+    test("200: array of articles is sorted by descending date", () => {
+        return request(app)
+            .get("/api/articles")
+            .expect(200)
+            .then(({ body: { articles } }) => {
+                expect(articles).toBeSortedBy("created_at", {
+                    descending: true,
+                });
+            });
+    });
+
+    test("200: article comment count is correct", () => {
+        return request(app)
+            .get("/api/articles")
+            .expect(200)
+            .then(({ body: { articles } }) => {
+                articles.forEach((article) => {
+                    if (article.article_id === 1) {
+                        expect(article.comment_count).toBe(11);
+                    }
+
+                    if (article.article_id === 2) {
+                        expect(article.comment_count).toBe(0);
+                    }
+                });
+            });
+    });
+
+    test("200: article created_at date is correct", () => {
+        return request(app)
+            .get("/api/articles")
+            .expect(200)
+            .then(({ body: { articles } }) => {
+                // Not affected by weird Timezone magic
+                expect(articles[0].created_at).toBe("2020-11-03T09:12:00.000Z");
+                
+                // Affected by weird Timezone magic
+                expect(articles[1].created_at).toBe("2020-10-18T02:00:00.000Z");
+            });
+    });
+});
+
 describe("GET /api/articles/:article_id", () => {
     test("200: returns article with the given id", () => {
         const expected = {
