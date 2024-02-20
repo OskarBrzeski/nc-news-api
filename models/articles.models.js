@@ -17,7 +17,8 @@ exports.selectArticleById = (article_id) => {
             // For some reason, Postgres seems to be returning the date with a
             // timezone I didn't ask for, so I need to account for the discrepency
             const offsetMilliseconds = article.created_at.getTimezoneOffset() * 60 * 1000;
-            article.created_at = Date.parse(article.created_at) - offsetMilliseconds;
+            const correctTimestamp = Date.parse(article.created_at) - offsetMilliseconds;
+            article.created_at = new Date(correctTimestamp);
             return article;
         });
 };
