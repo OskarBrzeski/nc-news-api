@@ -58,11 +58,11 @@ describe("GET /api/topics", () => {
 describe("GET /api/articles/:article_id", () => {
     test("200: returns article with the given id", () => {
         const expected = {
-            article_id: 1,
-            title: "Living in the shadow of a great man",
-            topic: "mitch",
             author: "butter_bridge",
+            title: "Living in the shadow of a great man",
+            article_id: 1,
             body: "I find this existence challenging",
+            topic: "mitch",
             created_at: 1594329060000,
             votes: 100,
             article_img_url:
@@ -87,7 +87,7 @@ describe("GET /api/articles/:article_id", () => {
             });
     });
 
-    test("400: returns error when given invalid id", () => {
+    test("400: returns error when given invalid id type", () => {
         return request(app)
             .get("/api/articles/one")
             .expect(400)
