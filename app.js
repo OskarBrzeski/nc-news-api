@@ -1,7 +1,8 @@
 const express = require("express");
 const { getTopics } = require("./controllers/topics.controllers");
-const { getNotExists } = require("./controllers/errors.controllers");
+const { handleBadEndpoint, handleBadIdType, handleCustomError } = require("./controllers/errors.controllers");
 const { getEndpoints } = require("./controllers/api.controllers");
+const { getArticleById } = require("./controllers/articles.controllers");
 
 const app = express();
 
@@ -9,15 +10,12 @@ app.get("/api", getEndpoints);
 
 app.get("/api/topics", getTopics);
 
-// Allows error from invalid endpoint to go into middleware
-app.get("/*", getNotExists);
+app.get("/api/articles/:article_id", getArticleById)
 
-app.use((err, req, res, next) => {
-    if (err.status && err.msg && err.desc) {
-        res.status(err.status).send({ msg: err.msg, desc: err.desc });
-    }
+app.all("/*", handleBadEndpoint);
 
-    next(err);
-});
+app.use(handleCustomError);
+
+app.use(handleBadIdType)
 
 module.exports = app;
