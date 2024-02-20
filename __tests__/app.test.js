@@ -115,7 +115,7 @@ describe("GET /api/articles", () => {
             .then(({ body: { articles } }) => {
                 // Not affected by weird Timezone magic
                 expect(articles[0].created_at).toBe("2020-11-03T09:12:00.000Z");
-                
+
                 // Affected by weird Timezone magic
                 expect(articles[1].created_at).toBe("2020-10-18T02:00:00.000Z");
             });
@@ -157,6 +157,80 @@ describe("GET /api/articles/:article_id", () => {
     test("400: returns error when given invalid id type", () => {
         return request(app)
             .get("/api/articles/one")
+            .expect(400)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Bad request");
+                expect(desc).toBe("ID of invalid type given");
+            });
+    });
+});
+
+describe("GET /api/articles/:articles_id/comments", () => {
+    test("200: returns array of all comments for given article", () => {
+        return request(app)
+            .get("/api/articles/1/comments")
+            .expect(200)
+            .then(({ body: { comments } }) => {
+                expect(comments).toHaveLength(11);
+
+                comments.forEach((comment) => {
+                    expect(comment).toMatchObject({
+                        comment_id: expect.any(Number),
+                        votes: expect.any(Number),
+                        created_at: expect.any(String),
+                        author: expect.any(String),
+                        body: expect.any(String),
+                        article_id: expect.any(Number),
+                    });
+                });
+            });
+    });
+    test("200: array of comments is ordered by descending date", () => {
+        return request(app)
+            .get("/api/articles/1/comments")
+            .expect(200)
+            .then(({ body: { comments } }) => {
+                expect(comments).toBeSortedBy("created_at", {
+                    descending: true,
+                });
+            });
+    });
+
+    test("200: comment created_at date is correct", () => {
+        return request(app)
+            .get("/api/articles/1/comments")
+            .expect(200)
+            .then(({ body: { comments } }) => {
+                // Not affected by weird Timezone magic
+                expect(comments[0].created_at).toBe("2020-11-03T21:00:00.000Z");
+
+                // Affected by weird Timezone magic
+                expect(comments[2].created_at).toBe("2020-07-21T01:20:00.000Z");
+            });
+    });
+
+    test("200: returns empty array if article has no comments", () => {
+        return request(app)
+            .get("/api/articles/2/comments")
+            .expect(200)
+            .then(({ body: { comments } }) => {
+                expect(comments).toEqual([]);
+            });
+    });
+
+    test("404: returns error when given id without article", () => {
+        return request(app)
+            .get("/api/articles/1000/comments")
+            .expect(404)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Not found");
+                expect(desc).toBe("No article found with given ID");
+            });
+    });
+
+    test("400: returns error when given invalid id type", () => {
+        return request(app)
+            .get("/api/articles/one/comments")
             .expect(400)
             .then(({ body: { msg, desc } }) => {
                 expect(msg).toBe("Bad request");
