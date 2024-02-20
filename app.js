@@ -1,6 +1,6 @@
 const express = require("express");
 const { getTopics } = require("./controllers/topics.controllers");
-const { handleBadEndpoint } = require("./controllers/errors.controllers");
+const { handleBadEndpoint, handleBadIdType, handleCustomError } = require("./controllers/errors.controllers");
 const { getEndpoints } = require("./controllers/api.controllers");
 const { getArticleById } = require("./controllers/articles.controllers");
 
@@ -14,20 +14,8 @@ app.get("/api/articles/:article_id", getArticleById)
 
 app.all("/*", handleBadEndpoint);
 
-app.use((err, req, res, next) => {
-    if (err.status && err.msg && err.desc) {
-        res.status(err.status).send({ msg: err.msg, desc: err.desc });
-    }
+app.use(handleCustomError);
 
-    next(err);
-});
-
-app.use((err, req, res, next) => {
-    if (err.code === "22P02") {
-        res.status(400).send({msg: "Bad request", desc: "ID of invalid type given"})
-    }
-
-    next(err)
-})
+app.use(handleBadIdType)
 
 module.exports = app;
