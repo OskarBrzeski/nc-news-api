@@ -2,6 +2,8 @@ const { selectArticleById } = require("../models/articles.models");
 const {
     selectCommentsByArticleId,
     insertComment,
+    selectCommentByCommentId,
+    deleteComment,
 } = require("../models/comments.models");
 const { selectUserByUsername } = require("../models/users.models");
 
@@ -22,7 +24,7 @@ exports.getCommentsByArticleId = (req, res, next) => {
 
 exports.postComment = (req, res, next) => {
     const articleId = req.params.article_id;
-    const {username, body} = req.body;
+    const { username, body } = req.body;
 
     if (username === undefined || body === undefined) {
         next({
@@ -41,6 +43,21 @@ exports.postComment = (req, res, next) => {
     Promise.all(promises)
         .then(([_a, _b, comment]) => {
             res.status(201).send({ comment });
+        })
+        .catch(next);
+};
+
+exports.deleteCommentByCommentId = (req, res, next) => {
+    const commentId = req.params.comment_id;
+
+    const promises = [
+        selectCommentByCommentId(commentId),
+        deleteComment(commentId),
+    ];
+
+    Promise.all(promises)
+        .then(() => {
+            res.status(204).send();
         })
         .catch(next);
 };
