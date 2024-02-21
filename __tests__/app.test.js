@@ -238,3 +238,90 @@ describe("GET /api/articles/:articles_id/comments", () => {
             });
     });
 });
+
+describe("POST /api/articles/:article_id/comments", () => {
+    test("201: successfully adds comment", () => {
+        const body = {
+            username: "rogersop",
+            body: "Wonderful article.",
+        };
+
+        return request(app)
+            .post("/api/articles/1/comments")
+            .send(body)
+            .expect(201)
+            .then(({ body: { comment } }) => {
+                expect(comment).toMatchObject({
+                    comment_id: expect.any(Number),
+                    body: body.body,
+                    votes: 0,
+                    author: body.username,
+                    article_id: 1,
+                    created_at: expect.any(String),
+                });
+            });
+    });
+
+    test("400: returns error when request body is missing attributes", () => {
+        const body = {
+            body: "Wonderful article.",
+        };
+
+        return request(app)
+            .post("/api/articles/1/comments")
+            .send(body)
+            .expect(400)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Bad request");
+                expect(desc).toBe("Missing attribute in request body");
+            });
+    });
+
+    test("404: returns error when request body references username that does not exist", () => {
+        const body = {
+            username: "wonderuser",
+            body: "Wonderful article.",
+        };
+
+        return request(app)
+            .post("/api/articles/1/comments")
+            .send(body)
+            .expect(404)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Not found");
+                expect(desc).toBe("No user found with given username");
+            });
+    });
+
+    test("404: returns error when given id without article", () => {
+        const body = {
+            username: "rogersop",
+            body: "Wonderful article.",
+        };
+
+        return request(app)
+            .post("/api/articles/1000/comments")
+            .send(body)
+            .expect(404)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Not found");
+                expect(desc).toBe("No article found with given ID");
+            });
+    });
+
+    test("400: returns error when given invalid id type", () => {
+        const body = {
+            username: "rogersop",
+            body: "Wonderful article.",
+        };
+
+        return request(app)
+            .post("/api/articles/one/comments")
+            .send(body)
+            .expect(400)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Bad request");
+                expect(desc).toBe("ID of invalid type given");
+            });
+    });
+});
