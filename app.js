@@ -4,6 +4,8 @@ const {
     handleBadEndpoint,
     handleBadIdType,
     handleCustomError,
+    handleInvalidForeignKey,
+    handleMissingAttributes,
 } = require("./controllers/errors.controllers");
 const { getEndpoints } = require("./controllers/api.controllers");
 const {
@@ -45,5 +47,9 @@ app.all("/*", handleBadEndpoint);
 app.use(handleCustomError);
 
 app.use(handleBadIdType);
+
+app.use(handleMissingAttributes);
+
+app.use(handleInvalidForeignKey);
 
 module.exports = app;
