@@ -1,6 +1,7 @@
 const {
     selectArticleById,
     selectAllArticles,
+    updateArticleVotes,
 } = require("../models/articles.models");
 
 exports.getArticles = (req, res, next) => {
@@ -16,6 +17,30 @@ exports.getArticleById = (req, res, next) => {
 
     selectArticleById(article_id)
         .then((article) => {
+            res.status(200).send({ article });
+        })
+        .catch(next);
+};
+
+exports.patchArticleById = (req, res, next) => {
+    const articleId = req.params.article_id;
+    const { inc_votes } = req.body;
+
+    if (inc_votes === undefined) {
+        next({
+            status: 400,
+            msg: "Bad request",
+            desc: "Missing attribute in request body",
+        });
+    }
+
+    const promises = [
+        selectArticleById(articleId),
+        updateArticleVotes(articleId, inc_votes),
+    ];
+
+    Promise.all(promises)
+        .then(([_, article]) => {
             res.status(200).send({ article });
         })
         .catch(next);

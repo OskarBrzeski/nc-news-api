@@ -38,3 +38,18 @@ exports.selectArticleById = (article_id) => {
             return article;
         });
 };
+
+exports.updateArticleVotes = (articleId, votes) => {
+    const query = `
+        UPDATE articles
+        SET votes = votes + $1
+        WHERE article_id = $2
+        RETURNING *
+    `;
+
+    return db.query(query, [votes, articleId]).then(({ rows }) => {
+        rows[0].created_at = fixTimestamp(rows[0].created_at);
+
+        return rows[0];
+    });
+};

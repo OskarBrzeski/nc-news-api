@@ -165,6 +165,111 @@ describe("GET /api/articles/:article_id", () => {
     });
 });
 
+describe("PATCH /api/articles/:article_id", () => {
+    test("200: successfully increments article vote count", () => {
+        const body = { inc_votes: 10 };
+
+        return request(app)
+            .patch("/api/articles/1")
+            .send(body)
+            .expect(200)
+            .then(({ body: { article } }) => {
+                expect(article).toMatchObject({
+                    article_id: 1,
+                    title: "Living in the shadow of a great man",
+                    topic: "mitch",
+                    author: "butter_bridge",
+                    body: "I find this existence challenging",
+                    created_at: "2020-07-09T21:11:00.000Z",
+                    votes: 110,
+                    article_img_url:
+                        "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+                });
+            });
+    });
+
+    test("200: successfully decrements article vote count", () => {
+        const body = { inc_votes: -10 };
+
+        return request(app)
+            .patch("/api/articles/1")
+            .send(body)
+            .expect(200)
+            .then(({ body: { article } }) => {
+                expect(article).toMatchObject({
+                    article_id: 1,
+                    title: "Living in the shadow of a great man",
+                    topic: "mitch",
+                    author: "butter_bridge",
+                    body: "I find this existence challenging",
+                    created_at: "2020-07-09T21:11:00.000Z",
+                    votes: 90,
+                    article_img_url:
+                        "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+                });
+            });
+    });
+
+    test("200: successfully decrements article vote count below 0", () => {
+        const body = { inc_votes: -150 };
+
+        return request(app)
+            .patch("/api/articles/1")
+            .send(body)
+            .expect(200)
+            .then(({ body: { article } }) => {
+                expect(article).toMatchObject({
+                    article_id: 1,
+                    title: "Living in the shadow of a great man",
+                    topic: "mitch",
+                    author: "butter_bridge",
+                    body: "I find this existence challenging",
+                    created_at: "2020-07-09T21:11:00.000Z",
+                    votes: -50,
+                    article_img_url:
+                        "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+                });
+            });
+    });
+
+    test("400: returns error when request body is missing attribute", () => {
+        return request(app)
+            .patch("/api/articles/1")
+            .send({})
+            .expect(400)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Bad request");
+                expect(desc).toBe("Missing attribute in request body");
+            });
+    });
+
+    test("404: returns error when given id without article", () => {
+        const body = { inc_votes: 10 };
+
+        return request(app)
+            .patch("/api/articles/1000")
+            .send(body)
+            .expect(404)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Not found");
+                expect(desc).toBe("No article found with given ID");
+            });
+    });
+
+    test("400: returns error when given invalid id type", () => {
+        const body = { inc_votes: 10 };
+
+        return request(app)
+            .patch("/api/articles/one")
+            .send(body)
+            .expect(400)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Bad request");
+                expect(desc).toBe("ID of invalid type given");
+            });
+    });
+});
+
 describe("GET /api/articles/:articles_id/comments", () => {
     test("200: returns array of all comments for given article", () => {
         return request(app)
