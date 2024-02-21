@@ -14,7 +14,7 @@ exports.handleBadIdType = (err, req, res, next) => {
     if (err.code === "22P02") {
         res.status(400).send({
             msg: "Bad request",
-            desc: "ID of invalid type given",
+            desc: "Invalid type given, expected integer",
         });
     }
 

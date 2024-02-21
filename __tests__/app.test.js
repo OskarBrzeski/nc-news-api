@@ -187,7 +187,7 @@ describe("GET /api/articles/:article_id", () => {
             .expect(400)
             .then(({ body: { msg, desc } }) => {
                 expect(msg).toBe("Bad request");
-                expect(desc).toBe("ID of invalid type given");
+                expect(desc).toBe("Invalid type given, expected integer");
             });
     });
 });
@@ -292,7 +292,7 @@ describe("PATCH /api/articles/:article_id", () => {
             .expect(400)
             .then(({ body: { msg, desc } }) => {
                 expect(msg).toBe("Bad request");
-                expect(desc).toBe("ID of invalid type given");
+                expect(desc).toBe("Invalid type given, expected integer");
             });
     });
 });
@@ -366,7 +366,7 @@ describe("GET /api/articles/:articles_id/comments", () => {
             .expect(400)
             .then(({ body: { msg, desc } }) => {
                 expect(msg).toBe("Bad request");
-                expect(desc).toBe("ID of invalid type given");
+                expect(desc).toBe("Invalid type given, expected integer");
             });
     });
 });
@@ -453,7 +453,7 @@ describe("POST /api/articles/:article_id/comments", () => {
             .expect(400)
             .then(({ body: { msg, desc } }) => {
                 expect(msg).toBe("Bad request");
-                expect(desc).toBe("ID of invalid type given");
+                expect(desc).toBe("Invalid type given, expected integer");
             });
     });
 });
@@ -484,7 +484,7 @@ describe("DELETE /api/comments/:comment_id", () => {
             .expect(400)
             .then(({ body: { msg, desc } }) => {
                 expect(msg).toBe("Bad request");
-                expect(desc).toBe("ID of invalid type given");
+                expect(desc).toBe("Invalid type given, expected integer");
             });
     });
 });
