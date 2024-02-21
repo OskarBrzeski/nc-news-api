@@ -14,10 +14,37 @@ afterAll(() => {
     return db.end();
 });
 
-describe("GET /api/does-not-exist", () => {
-    test("404: returns error if endpoint does not exist", () => {
+describe("/api/does-not-exist", () => {
+    test("GET 404: returns error if endpoint does not exist", () => {
         return request(app)
-            .get("/api/does-not-exist")
+            .get("/api/get-does-not-exist")
+            .expect(404)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Not found");
+                expect(desc).toBe("Endpoint does not exist");
+            });
+    });
+    test("POST 404: returns error if endpoint does not exist", () => {
+        return request(app)
+            .post("/api/post-does-not-exist")
+            .expect(404)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Not found");
+                expect(desc).toBe("Endpoint does not exist");
+            });
+    });
+    test("PATCH 404: returns error if endpoint does not exist", () => {
+        return request(app)
+            .patch("/api/patch-does-not-exist")
+            .expect(404)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Not found");
+                expect(desc).toBe("Endpoint does not exist");
+            });
+    });
+    test("DELETE 404: returns error if endpoint does not exist", () => {
+        return request(app)
+            .delete("/api/delete-does-not-exist")
             .expect(404)
             .then(({ body: { msg, desc } }) => {
                 expect(msg).toBe("Not found");
