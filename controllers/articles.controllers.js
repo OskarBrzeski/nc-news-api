@@ -34,13 +34,8 @@ exports.patchArticleById = (req, res, next) => {
         });
     }
 
-    const promises = [
-        selectArticleById(articleId),
-        updateArticleVotes(articleId, inc_votes),
-    ];
-
-    Promise.all(promises)
-        .then(([_, article]) => {
+    updateArticleVotes(articleId, inc_votes)
+        .then((article) => {
             res.status(200).send({ article });
         })
         .catch(next);

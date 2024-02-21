@@ -20,3 +20,38 @@ exports.handleBadIdType = (err, req, res, next) => {
 
     next(err);
 };
+
+exports.handleMissingAttributes = (err, req, res, next) => {
+    if (err.code === "23502") {
+        res.status(400).send({
+            msg: "Bad request",
+            desc: "Missing attribute in request body",
+        });
+    }
+
+    next(err);
+};
+
+exports.handleInvalidForeignKey = (err, req, res, next) => {
+    if (err.code === "23503") {
+        let err_desc = "";
+
+        switch (err.constraint) {
+            case "comments_author_fkey":
+                err_desc = "No user found with given username";
+                break;
+            case "comments_article_id_fkey":
+                err_desc = "No article found with given ID";
+                break;
+            default:
+                err_desc = "Foreign key constraint was violated";
+        }
+
+        res.status(404).send({
+            msg: "Not found",
+            desc: err_desc,
+        });
+    }
+
+    next(err);
+};
