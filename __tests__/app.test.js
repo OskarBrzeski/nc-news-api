@@ -259,6 +259,22 @@ describe("PATCH /api/articles/:article_id", () => {
             });
     });
 
+    test('400: returns error when request bodfy attribute is of incorrect type', () => {
+        const body = {
+            inc_votes: "cheese"
+        }
+
+        return request(app)
+            .patch("/api/articles/1")
+            .send(body)
+            .expect(400)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Bad request");
+                expect(desc).toBe("Invalid type given, expected integer");
+            });
+        
+    });
+
     test("400: returns error when request body is missing attribute", () => {
         return request(app)
             .patch("/api/articles/1")
