@@ -457,3 +457,34 @@ describe("POST /api/articles/:article_id/comments", () => {
             });
     });
 });
+
+describe("DELETE /api/comments/:comment_id", () => {
+    test("204: successfully removes comment", () => {
+        return request(app)
+            .delete("/api/comments/1")
+            .expect(204)
+            .then(({ body }) => {
+                expect(body).toEqual({});
+            });
+    });
+    
+    test("404: returns error when given id without comment", () => {
+        return request(app)
+            .delete("/api/comments/1000")
+            .expect(404)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Not found");
+                expect(desc).toBe("No comment found with given ID");
+            });
+    });
+
+    test("400: returns error when given invalid id type", () => {
+        return request(app)
+            .delete("/api/comments/one")
+            .expect(400)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Bad request");
+                expect(desc).toBe("ID of invalid type given");
+            });
+    });
+});
