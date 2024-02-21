@@ -1,6 +1,25 @@
 const db = require("../db/connection");
 const { fixTimestamp } = require("./utils");
 
+exports.selectCommentByCommentId = (commentId) => {
+    const query = `
+        SELECT * FROM comments
+        WHERE comment_id = $1
+    `;
+
+    return db.query(query, [commentId]).then(({ rows }) => {
+        if (rows.length === 0) {
+            return Promise.reject({
+                status: 404,
+                msg: "Not found",
+                desc: "No comment found with given ID",
+            });
+        }
+
+        return rows[0];
+    });
+};
+
 exports.selectCommentsByArticleId = (articleId) => {
     const query = `
         SELECT * FROM comments
@@ -29,4 +48,13 @@ exports.insertComment = (username, body, articleId) => {
     return db.query(query, [username, body, articleId]).then(({ rows }) => {
         return rows[0];
     });
+};
+
+exports.deleteComment = (commentId) => {
+    const query = `
+        DELETE FROM comments
+        WHERE comment_id = $1
+    `;
+
+    return db.query(query, [commentId]);
 };

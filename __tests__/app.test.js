@@ -14,10 +14,37 @@ afterAll(() => {
     return db.end();
 });
 
-describe("GET /api/does-not-exist", () => {
-    test("404: returns error if endpoint does not exist", () => {
+describe("/api/does-not-exist", () => {
+    test("GET 404: returns error if endpoint does not exist", () => {
         return request(app)
-            .get("/api/does-not-exist")
+            .get("/api/get-does-not-exist")
+            .expect(404)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Not found");
+                expect(desc).toBe("Endpoint does not exist");
+            });
+    });
+    test("POST 404: returns error if endpoint does not exist", () => {
+        return request(app)
+            .post("/api/post-does-not-exist")
+            .expect(404)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Not found");
+                expect(desc).toBe("Endpoint does not exist");
+            });
+    });
+    test("PATCH 404: returns error if endpoint does not exist", () => {
+        return request(app)
+            .patch("/api/patch-does-not-exist")
+            .expect(404)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Not found");
+                expect(desc).toBe("Endpoint does not exist");
+            });
+    });
+    test("DELETE 404: returns error if endpoint does not exist", () => {
+        return request(app)
+            .delete("/api/delete-does-not-exist")
             .expect(404)
             .then(({ body: { msg, desc } }) => {
                 expect(msg).toBe("Not found");
@@ -423,6 +450,37 @@ describe("POST /api/articles/:article_id/comments", () => {
         return request(app)
             .post("/api/articles/one/comments")
             .send(body)
+            .expect(400)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Bad request");
+                expect(desc).toBe("ID of invalid type given");
+            });
+    });
+});
+
+describe("DELETE /api/comments/:comment_id", () => {
+    test("204: successfully removes comment", () => {
+        return request(app)
+            .delete("/api/comments/1")
+            .expect(204)
+            .then(({ body }) => {
+                expect(body).toEqual({});
+            });
+    });
+    
+    test("404: returns error when given id without comment", () => {
+        return request(app)
+            .delete("/api/comments/1000")
+            .expect(404)
+            .then(({ body: { msg, desc } }) => {
+                expect(msg).toBe("Not found");
+                expect(desc).toBe("No comment found with given ID");
+            });
+    });
+
+    test("400: returns error when given invalid id type", () => {
+        return request(app)
+            .delete("/api/comments/one")
             .expect(400)
             .then(({ body: { msg, desc } }) => {
                 expect(msg).toBe("Bad request");
