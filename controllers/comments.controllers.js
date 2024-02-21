@@ -1,5 +1,9 @@
 const { selectArticleById } = require("../models/articles.models");
-const { selectCommentsByArticleId } = require("../models/comments.models");
+const {
+    selectCommentsByArticleId,
+    insertComment,
+} = require("../models/comments.models");
+const { selectUserByUsername } = require("../models/users.models");
 
 exports.getCommentsByArticleId = (req, res, next) => {
     const articleId = req.params.article_id;
@@ -12,6 +16,31 @@ exports.getCommentsByArticleId = (req, res, next) => {
     Promise.all(promises)
         .then(([_, comments]) => {
             res.status(200).send({ comments });
+        })
+        .catch(next);
+};
+
+exports.postComment = (req, res, next) => {
+    const articleId = req.params.article_id;
+    const {username, body} = req.body;
+
+    if (username === undefined || body === undefined) {
+        next({
+            status: 400,
+            msg: "Bad request",
+            desc: "Missing attribute in request body",
+        });
+    }
+
+    const promises = [
+        selectArticleById(articleId),
+        selectUserByUsername(username),
+        insertComment(username, body, articleId),
+    ];
+
+    Promise.all(promises)
+        .then(([_a, _b, comment]) => {
+            res.status(201).send({ comment });
         })
         .catch(next);
 };
