@@ -1,5 +1,5 @@
 const express = require("express");
-const { getTopics } = require("./controllers/topics.controllers");
+
 const {
     handleBadEndpoint,
     handleBadIdType,
@@ -7,40 +7,26 @@ const {
     handleInvalidForeignKey,
     handleMissingAttributes,
 } = require("./controllers/errors.controllers");
-const { getEndpoints } = require("./controllers/api.controllers");
-const {
-    getArticleById,
-    getArticles,
-    patchArticleById,
-} = require("./controllers/articles.controllers");
-const {
-    getCommentsByArticleId,
-    postComment,
-    deleteCommentByCommentId,
-} = require("./controllers/comments.controllers");
-const { getAllUsers } = require("./controllers/users.controllers");
+
+const apiRouter = require("./routes/api.router");
+const articlesRouter = require("./routes/articles.router");
+const topicsRouter = require("./routes/topics.router");
+const commentsRouter = require("./routes/comments.router");
+const usersRouter = require("./routes/users.router");
 
 const app = express();
 
 app.use(express.json());
 
-app.get("/api", getEndpoints);
+app.use("/api", apiRouter);
 
-app.get("/api/topics", getTopics);
+apiRouter.use("/topics", topicsRouter);
 
-app.get("/api/articles", getArticles);
+apiRouter.use("/articles", articlesRouter);
 
-app.get("/api/articles/:article_id", getArticleById);
+apiRouter.use("/comments", commentsRouter);
 
-app.patch("/api/articles/:article_id", patchArticleById);
-
-app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
-
-app.post("/api/articles/:article_id/comments", postComment);
-
-app.delete("/api/comments/:comment_id", deleteCommentByCommentId);
-
-app.get("/api/users", getAllUsers);
+apiRouter.use("/users", usersRouter);
 
 app.all("/*", handleBadEndpoint);
 
