@@ -1,27 +1,12 @@
 const {
     selectArticleById,
-    selectAllArticles,
+    selectArticles,
     updateArticleVotes,
-    selectArticlesWithQuery,
 } = require("../models/articles.models");
 const { selectTopicBySlug } = require("../models/topics.models");
 
 exports.getArticles = (req, res, next) => {
-    if (Object.keys(req.query).length > 0) {
-        getArticlesWithQuery(req, res, next);
-    } else {
-        selectAllArticles()
-            .then((articles) => {
-                res.status(200).send({ articles });
-            })
-            .catch(next);
-    }
-};
-
-const getArticlesWithQuery = (req, res, next) => {
-    const topic = req.query.topic;
-
-    const promises = [selectTopicBySlug(topic), selectArticlesWithQuery(topic)];
+    const promises = [selectTopicBySlug(req.query.topic), selectArticles(req.query)];
 
     Promise.all(promises)
         .then(([_, articles]) => {
