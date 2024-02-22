@@ -1,39 +1,66 @@
 const db = require("../db/connection");
 const { fixTimestamp } = require("./utils");
 
-exports.selectAllArticles = () => {
-    const query = `
-        SELECT a.author, a.title, a.article_id, a.topic,
-        a.created_at, a.votes, a.article_img_url,
-        CAST(COUNT(c.article_id) AS INTEGER) AS comment_count
-        FROM articles AS a
-        LEFT JOIN comments AS c ON a.article_id = c.article_id
-        GROUP BY a.article_id
-        ORDER BY a.created_at DESC;
-    `;
+exports.selectArticles = ({
+    sorted_by = "created_at",
+    order = "desc",
+    ...queryObj
+}) => {
+    const validSorts = [
+        "created_at",
+        "author",
+        "title",
+        "article_id",
+        "topic",
+        "votes",
+        "comment_count",
+    ];
 
-    return db.query(query).then(({ rows }) => {
-        rows.forEach((article) => {
-            article.created_at = fixTimestamp(article.created_at);
+    if (!validSorts.includes(sorted_by)) {
+        return Promise.reject({
+            status: 400,
+            msg: "Bad request",
+            desc: "Cannot sort by given attribute",
         });
+    }
 
-        return rows;
-    });
-};
+    if (sorted_by !== "comment_count") {
+        sorted_by = `a.${sorted_by}`;
+    }
 
-exports.selectArticlesWithQuery = (topic) => {
+    if (!["asc", "desc"].includes(order)) {
+        return Promise.reject({
+            status: 400,
+            msg: "Bad request",
+            desc: "Order must be 'asc' or 'desc'",
+        });
+    }
+    
+    const valueArray = [];
+    const queryArray = [];
+
+    for (let key in queryObj) {
+        valueArray.push(queryObj[key]);
+        queryArray.push(`a.${key} = $${valueArray.length}`);
+    }
+
+    let whereClause = "";
+    if (queryArray.length > 0) {
+        whereClause = `WHERE ${queryArray.join(" AND ")}`;
+    }
+
     const query = `
         SELECT a.author, a.title, a.article_id, a.topic,
         a.created_at, a.votes, a.article_img_url,
         CAST(COUNT(c.article_id) AS INTEGER) AS comment_count
         FROM articles AS a
         LEFT JOIN comments AS c ON a.article_id = c.article_id
-        WHERE a.topic = $1
+        ${whereClause}
         GROUP BY a.article_id
-        ORDER BY a.created_at DESC;
+        ORDER BY ${sorted_by} ${order};
     `;
 
-    return db.query(query, [topic]).then(({ rows }) => {
+    return db.query(query, valueArray).then(({ rows }) => {
         rows.forEach((article) => {
             article.created_at = fixTimestamp(article.created_at);
         });
