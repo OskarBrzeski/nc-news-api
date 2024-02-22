@@ -25,8 +25,6 @@ exports.selectArticles = (queryObj) => {
         GROUP BY a.article_id
         ORDER BY a.created_at DESC;
     `;
-    console.log(query)
-    console.log(valueArray)
 
     return db.query(query, valueArray).then(({ rows }) => {
         rows.forEach((article) => {

@@ -6,10 +6,19 @@ const {
 const { selectTopicBySlug } = require("../models/topics.models");
 
 exports.getArticles = (req, res, next) => {
-    const promises = [selectTopicBySlug(req.query.topic), selectArticles(req.query)];
+    const promises = [];
+
+    if (req.query.topic !== undefined) {
+        promises.push(selectTopicBySlug(req.query.topic));
+    }
+
+    promises.push(selectArticles(req.query));
 
     Promise.all(promises)
-        .then(([_, articles]) => {
+        .then((outcomes) => {
+            return outcomes[outcomes.length - 1];
+        })
+        .then((articles) => {
             res.status(200).send({ articles });
         })
         .catch(next);
