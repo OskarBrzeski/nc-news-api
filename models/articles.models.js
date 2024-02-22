@@ -21,6 +21,27 @@ exports.selectAllArticles = () => {
     });
 };
 
+exports.selectArticlesWithQuery = (topic) => {
+    const query = `
+        SELECT a.author, a.title, a.article_id, a.topic,
+        a.created_at, a.votes, a.article_img_url,
+        CAST(COUNT(c.article_id) AS INTEGER) AS comment_count
+        FROM articles AS a
+        LEFT JOIN comments AS c ON a.article_id = c.article_id
+        WHERE a.topic = $1
+        GROUP BY a.article_id
+        ORDER BY a.created_at DESC;
+    `;
+
+    return db.query(query, [topic]).then(({ rows }) => {
+        rows.forEach((article) => {
+            article.created_at = fixTimestamp(article.created_at);
+        });
+
+        return rows;
+    });
+};
+
 exports.selectArticleById = (article_id) => {
     return db
         .query("SELECT * FROM articles WHERE article_id = $1", [article_id])
@@ -55,7 +76,7 @@ exports.updateArticleVotes = (articleId, votes) => {
                 desc: "No article found with given ID",
             });
         }
-        
+
         rows[0].created_at = fixTimestamp(rows[0].created_at);
 
         return rows[0];

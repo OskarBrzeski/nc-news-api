@@ -147,6 +147,50 @@ describe("GET /api/articles", () => {
                 expect(articles[1].created_at).toBe("2020-10-18T02:00:00.000Z");
             });
     });
+
+    describe("?topic=", () => {
+        test("200: returns array of all article with the given topic", () => {
+            return request(app)
+                .get("/api/articles?topic=mitch")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toHaveLength(12);
+
+                    articles.forEach((article) => {
+                        expect(article.topic).toBe("mitch");
+                    });
+                });
+        });
+
+        test("200: returns empty array if topic exists but no articles have it", () => {
+            return request(app)
+                .get("/api/articles?topic=paper")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toHaveLength(0);
+                });
+        });
+
+        test("404: returns error if topic does not exist", () => {
+            return request(app)
+                .get("/api/articles?topic=cheese")
+                .expect(404)
+                .then(({ body: { msg, desc } }) => {
+                    expect(msg).toBe("Not found");
+                    expect(desc).toBe("No topic found with given slug");
+                });
+        });
+
+        test("404: returns error if topic query left empty", () => {
+            return request(app)
+                .get("/api/articles?topic=")
+                .expect(404)
+                .then(({ body: { msg, desc } }) => {
+                    expect(msg).toBe("Not found");
+                    expect(desc).toBe("No topic found with given slug");
+                });
+        });
+    });
 });
 
 describe("GET /api/articles/:article_id", () => {
@@ -259,10 +303,10 @@ describe("PATCH /api/articles/:article_id", () => {
             });
     });
 
-    test('400: returns error when request bodfy attribute is of incorrect type', () => {
+    test("400: returns error when request bodfy attribute is of incorrect type", () => {
         const body = {
-            inc_votes: "cheese"
-        }
+            inc_votes: "cheese",
+        };
 
         return request(app)
             .patch("/api/articles/1")
@@ -272,7 +316,6 @@ describe("PATCH /api/articles/:article_id", () => {
                 expect(msg).toBe("Bad request");
                 expect(desc).toBe("Invalid type given, expected integer");
             });
-        
     });
 
     test("400: returns error when request body is missing attribute", () => {
