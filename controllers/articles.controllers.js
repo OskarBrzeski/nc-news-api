@@ -2,11 +2,29 @@ const {
     selectArticleById,
     selectAllArticles,
     updateArticleVotes,
+    selectArticlesWithQuery,
 } = require("../models/articles.models");
+const { selectTopicBySlug } = require("../models/topics.models");
 
 exports.getArticles = (req, res, next) => {
-    selectAllArticles()
-        .then((articles) => {
+    if (Object.keys(req.query).length > 0) {
+        getArticlesWithQuery(req, res, next);
+    } else {
+        selectAllArticles()
+            .then((articles) => {
+                res.status(200).send({ articles });
+            })
+            .catch(next);
+    }
+};
+
+const getArticlesWithQuery = (req, res, next) => {
+    const topic = req.query.topic;
+
+    const promises = [selectTopicBySlug(topic), selectArticlesWithQuery(topic)];
+
+    Promise.all(promises)
+        .then(([_, articles]) => {
             res.status(200).send({ articles });
         })
         .catch(next);
