@@ -191,6 +191,50 @@ describe("GET /api/articles", () => {
                 });
         });
     });
+
+    describe("?order=", () => {
+        test("200: returns articles in descending order", () => {
+            return request(app)
+                .get("/api/articles?order=desc")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toBeSortedBy("created_at", {
+                        descending: true,
+                    });
+                });
+        });
+
+        test("200: returns articles in ascending order", () => {
+            return request(app)
+                .get("/api/articles?order=asc")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toBeSortedBy("created_at", {
+                        descending: false,
+                    });
+                });
+        });
+
+        test("400: returns error if query not filled", () => {
+            return request(app)
+                .get("/api/articles?order=")
+                .expect(400)
+                .then(({ body: { msg, desc } }) => {
+                    expect(msg).toBe("Bad request");
+                    expect(desc).toBe("Order must be 'asc' or 'desc'");
+                });
+        });
+
+        test("400: returns error if query is given invalid value", () => {
+            return request(app)
+                .get("/api/articles?order=middle")
+                .expect(400)
+                .then(({ body: { msg, desc } }) => {
+                    expect(msg).toBe("Bad request");
+                    expect(desc).toBe("Order must be 'asc' or 'desc'");
+                });
+        });
+    });
 });
 
 describe("GET /api/articles/:article_id", () => {

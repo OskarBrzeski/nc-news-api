@@ -1,7 +1,15 @@
 const db = require("../db/connection");
 const { fixTimestamp } = require("./utils");
 
-exports.selectArticles = (queryObj) => {
+exports.selectArticles = ({ order = "desc", ...queryObj }) => {
+    if (!["asc", "desc"].includes(order)) {
+        return Promise.reject({
+            status: 400,
+            msg: "Bad request",
+            desc: "Order must be 'asc' or 'desc'",
+        });
+    }
+
     const valueArray = [];
     const queryArray = [];
 
@@ -12,7 +20,7 @@ exports.selectArticles = (queryObj) => {
 
     let whereClause = "";
     if (queryArray.length > 0) {
-        whereClause = `WHERE ${queryArray.join(" AND ")}`
+        whereClause = `WHERE ${queryArray.join(" AND ")}`;
     }
 
     const query = `
@@ -23,7 +31,7 @@ exports.selectArticles = (queryObj) => {
         LEFT JOIN comments AS c ON a.article_id = c.article_id
         ${whereClause}
         GROUP BY a.article_id
-        ORDER BY a.created_at DESC;
+        ORDER BY a.created_at ${order};
     `;
 
     return db.query(query, valueArray).then(({ rows }) => {
