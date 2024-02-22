@@ -1,7 +1,33 @@
 const db = require("../db/connection");
 const { fixTimestamp } = require("./utils");
 
-exports.selectArticles = ({ order = "desc", ...queryObj }) => {
+exports.selectArticles = ({
+    sorted_by = "created_at",
+    order = "desc",
+    ...queryObj
+}) => {
+    const validSorts = [
+        "created_at",
+        "author",
+        "title",
+        "article_id",
+        "topic",
+        "votes",
+        "comment_count",
+    ];
+
+    if (!validSorts.includes(sorted_by)) {
+        return Promise.reject({
+            status: 400,
+            msg: "Bad request",
+            desc: "Cannot sort by given attribute",
+        });
+    }
+
+    if (sorted_by !== "comment_count") {
+        sorted_by = `a.${sorted_by}`;
+    }
+
     if (!["asc", "desc"].includes(order)) {
         return Promise.reject({
             status: 400,
@@ -9,7 +35,7 @@ exports.selectArticles = ({ order = "desc", ...queryObj }) => {
             desc: "Order must be 'asc' or 'desc'",
         });
     }
-
+    
     const valueArray = [];
     const queryArray = [];
 
@@ -31,7 +57,7 @@ exports.selectArticles = ({ order = "desc", ...queryObj }) => {
         LEFT JOIN comments AS c ON a.article_id = c.article_id
         ${whereClause}
         GROUP BY a.article_id
-        ORDER BY a.created_at ${order};
+        ORDER BY ${sorted_by} ${order};
     `;
 
     return db.query(query, valueArray).then(({ rows }) => {

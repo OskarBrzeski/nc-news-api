@@ -192,6 +192,114 @@ describe("GET /api/articles", () => {
         });
     });
 
+    describe("?sort_by=", () => {
+        test('200: returns articles sorted by created_at', () => {
+            return request(app)
+                .get("/api/articles?sorted_by=created_at")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toBeSortedBy("created_at", {
+                        descending: true,
+                    });
+                });
+        });
+        test("200: returns articles sorted by article_id", () => {
+            return request(app)
+                .get("/api/articles?sorted_by=article_id")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toBeSortedBy("article_id", {
+                        descending: true,
+                    });
+                });
+        });
+
+        test("200: returns articles sorted by author", () => {
+            return request(app)
+                .get("/api/articles?sorted_by=author")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toBeSortedBy("author", {
+                        descending: true,
+                    });
+                });
+        });
+
+        test("200: returns articles sorted by title", () => {
+            return request(app)
+                .get("/api/articles?sorted_by=title")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toBeSortedBy("title", {
+                        descending: true,
+                    });
+                });
+        });
+
+        test("200: returns articles sorted by topic", () => {
+            return request(app)
+                .get("/api/articles?sorted_by=topic")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toBeSortedBy("topic", {
+                        descending: true,
+                    });
+                });
+        });
+
+        test("200: returns articles sorted by votes", () => {
+            return request(app)
+                .get("/api/articles?sorted_by=votes")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toBeSortedBy("votes", {
+                        descending: true,
+                    });
+                });
+        });
+
+        test("200: returns articles sorted by comment_count", () => {
+            return request(app)
+                .get("/api/articles?sorted_by=comment_count")
+                .expect(200)
+                .then(({ body: { articles } }) => {
+                    expect(articles).toBeSortedBy("comment_count", {
+                        descending: true,
+                    });
+                });
+        });
+
+        test('400: returns error if trying to sort by image_url', () => {
+            return request(app)
+                .get("/api/articles?sorted_by=article_img_url")
+                .expect(400)
+                .then(({ body: { msg, desc } }) => {
+                    expect(msg).toBe("Bad request");
+                    expect(desc).toBe("Cannot sort by given attribute");
+                });
+        });
+
+        test('400: returns error if trying to sort by non-existent attribute', () => {
+            return request(app)
+                .get("/api/articles?sorted_by=cheese")
+                .expect(400)
+                .then(({ body: { msg, desc } }) => {
+                    expect(msg).toBe("Bad request");
+                    expect(desc).toBe("Cannot sort by given attribute");
+                });
+        });
+
+        test('400: returns error if sorted_by query left empty', () => {
+            return request(app)
+                .get("/api/articles?sorted_by=")
+                .expect(400)
+                .then(({ body: { msg, desc } }) => {
+                    expect(msg).toBe("Bad request");
+                    expect(desc).toBe("Cannot sort by given attribute");
+                });
+        });
+    });
+
     describe("?order=", () => {
         test("200: returns articles in descending order", () => {
             return request(app)
