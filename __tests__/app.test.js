@@ -467,7 +467,7 @@ describe("/api/articles/:article_id", () => {
                 });
         });
 
-        test("400: returns error when request bodfy attribute is of incorrect type", () => {
+        test("400: returns error when request body attribute is of incorrect type", () => {
             const body = {
                 inc_votes: "cheese",
             };
@@ -689,6 +689,115 @@ describe("/api/articles/:articles_id/comments", () => {
 });
 
 describe("/api/comments/:comment_id", () => {
+    describe("PATCH", () => {
+        test("200: successfully increments comment vote count", () => {
+            const body = { inc_votes: 10 };
+
+            return request(app)
+                .patch("/api/comments/1")
+                .send(body)
+                .expect(200)
+                .then(({ body: { comment } }) => {
+                    expect(comment).toEqual({
+                        comment_id: 1,
+                        body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+                        votes: 26,
+                        author: "butter_bridge",
+                        article_id: 9,
+                        created_at: "2020-04-06T13:17:00.000Z",
+                    });
+                });
+        });
+
+        test("200: successfully decrements comment vote count", () => {
+            const body = { inc_votes: -10 };
+
+            return request(app)
+                .patch("/api/comments/1")
+                .send(body)
+                .expect(200)
+                .then(({ body: { comment } }) => {
+                    expect(comment).toEqual({
+                        comment_id: 1,
+                        body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+                        votes: 6,
+                        author: "butter_bridge",
+                        article_id: 9,
+                        created_at: "2020-04-06T13:17:00.000Z",
+                    });
+                });
+        });
+
+        test("200: successfully decrements comment vote count below 0", () => {
+            const body = { inc_votes: -50 };
+
+            return request(app)
+                .patch("/api/comments/1")
+                .send(body)
+                .expect(200)
+                .then(({ body: { comment } }) => {
+                    expect(comment).toEqual({
+                        comment_id: 1,
+                        body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+                        votes: -34,
+                        author: "butter_bridge",
+                        article_id: 9,
+                        created_at: "2020-04-06T13:17:00.000Z",
+                    });
+                });
+        });
+
+        test("400: returns error when request body attribute is of incorrect type", () => {
+            const body = { inc_votes: "cheese" };
+
+            return request(app)
+                .patch("/api/comments/1")
+                .send(body)
+                .expect(400)
+                .then(({ body: { msg, desc } }) => {
+                    expect(msg).toBe("Bad request");
+                    expect(desc).toBe("Invalid type given, expected integer");
+                });
+        });
+
+        test("400: returns error when request body is missing attribute", () => {
+            return request(app)
+                .patch("/api/comments/1")
+                .send({})
+                .expect(400)
+                .then(({ body: { msg, desc } }) => {
+                    expect(msg).toBe("Bad request");
+                    expect(desc).toBe("Missing attribute in request body");
+                });
+        });
+
+        test("404: returns error when given id without comment", () => {
+            const body = { inc_votes: 10 };
+
+            return request(app)
+                .patch("/api/comments/1000")
+                .send(body)
+                .expect(404)
+                .then(({ body: { msg, desc } }) => {
+                    expect(msg).toBe("Not found");
+                    expect(desc).toBe("No comment found with given ID");
+                });
+        });
+
+        test("400: returns error when given invalid id type", () => {
+            const body = { inc_votes: 10 };
+
+            return request(app)
+                .patch("/api/comments/one")
+                .send(body)
+                .expect(400)
+                .then(({ body: { msg, desc } }) => {
+                    expect(msg).toBe("Bad request");
+                    expect(desc).toBe("Invalid type given, expected integer");
+                });
+        });
+    });
+
     describe("DELETE", () => {
         test("204: successfully removes comment", () => {
             return request(app)
