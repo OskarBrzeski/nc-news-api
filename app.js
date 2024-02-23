@@ -6,6 +6,7 @@ const {
     handleCustomError,
     handleInvalidForeignKey,
     handleMissingAttributes,
+    logErrors,
 } = require("./controllers/errors.controllers");
 
 const apiRouter = require("./routes/api.router");
@@ -37,5 +38,7 @@ app.use(handleBadIdType);
 app.use(handleMissingAttributes);
 
 app.use(handleInvalidForeignKey);
+
+// app.use(logErrors);
 
 module.exports = app;

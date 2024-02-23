@@ -55,3 +55,9 @@ exports.handleInvalidForeignKey = (err, req, res, next) => {
 
     next(err);
 };
+
+exports.logErrors = (err, req, res, next) => {
+    console.log(err);
+
+    next(err);
+};
