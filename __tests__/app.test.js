@@ -404,18 +404,108 @@ describe("/api/articles", () => {
                     });
             });
 
-            test('400: returns error if limit is not a number', () => {
+            test("400: returns error if limit is not a number", () => {
                 return request(app)
-                .get("/api/articles?limit=a")
-                .expect(400)
-                .then(({ body: {msg, desc}}) => {
+                    .get("/api/articles?limit=a")
+                    .expect(400)
+                    .then(({ body: { msg, desc } }) => {
                         expect(msg).toBe("Bad request");
                         expect(desc).toBe("Limit must be a number");
-                })
+                    });
             });
         });
 
-        describe("?p=", () => {});
+        describe("?p=", () => {
+            test("200: returns first page of articles", () => {
+                return request(app)
+                    .get("/api/articles?limit=5&p=1")
+                    .expect(200)
+                    .then(({ body: { articles, total_count } }) => {
+                        expect(articles).toHaveLength(5);
+                        expect(total_count).toBe(13);
+                    });
+            });
+
+            test("200: returns second page of articles", () => {
+                return request(app)
+                    .get("/api/articles?limit=5&p=2")
+                    .expect(200)
+                    .then(({ body: { articles, total_count } }) => {
+                        expect(articles).toHaveLength(5);
+                        expect(total_count).toBe(13);
+                    });
+            });
+
+            test("200: returns last page of articles", () => {
+                return request(app)
+                    .get("/api/articles?limit=5&p=3")
+                    .expect(200)
+                    .then(({ body: { articles, total_count } }) => {
+                        expect(articles).toHaveLength(3);
+                        expect(total_count).toBe(13);
+                    });
+            });
+
+            test("400: returns error if page contains no articles", () => {
+                return request(app)
+                    .get("/api/articles?limit=5&p=4")
+                    .expect(400)
+                    .then(({ body: { msg, desc } }) => {
+                        expect(msg).toBe("Bad request");
+                        expect(desc).toBe("Cannot serve requested page");
+                    });
+            });
+
+            test('400: returns error if page is set to 0', () => {
+                return request(app)
+                    .get("/api/articles?limit=5&p=0")
+                    .expect(400)
+                    .then(({ body: { msg, desc } }) => {
+                        expect(msg).toBe("Bad request");
+                        expect(desc).toBe("Cannot serve requested page");
+                    });
+            });
+
+            test('400: returns error if page set below 0', () => {
+                return request(app)
+                    .get("/api/articles?limit=5&p=-1")
+                    .expect(400)
+                    .then(({ body: { msg, desc } }) => {
+                        expect(msg).toBe("Bad request");
+                        expect(desc).toBe("Cannot serve requested page");
+                    });
+            });
+
+            test('400: returns error if page is not a number', () => {
+                return request(app)
+                    .get("/api/articles?limit=5&p=a")
+                    .expect(400)
+                    .then(({ body: { msg, desc } }) => {
+                        expect(msg).toBe("Bad request");
+                        expect(desc).toBe("Page must be a number");
+                    });
+            });
+
+            test('400: returns error if page query not specified', () => {
+                return request(app)
+                    .get("/api/articles?limit=5&p=")
+                    .expect(400)
+                    .then(({ body: { msg, desc } }) => {
+                        expect(msg).toBe("Bad request");
+                        expect(desc).toBe("Page must be a number");
+                    });
+            });
+
+            test('400: returns error if page query used without limit', () => {
+                return request(app)
+                    .get("/api/articles?p=2")
+                    .expect(400)
+                    .then(({ body: { msg, desc } }) => {
+                        expect(msg).toBe("Bad request");
+                        expect(desc).toBe("Cannot serve page without limit");
+                    });
+            });
+        });
     });
 
     describe("POST", () => {
