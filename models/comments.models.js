@@ -50,6 +50,29 @@ exports.insertComment = (username, body, articleId) => {
     });
 };
 
+exports.updateCommentVotes = (commentId, inc_votes) => {
+    const query = `
+        UPDATE comments
+        SET votes = votes + $1
+        WHERE comment_id = $2
+        RETURNING *
+    `;
+
+    return db.query(query, [inc_votes, commentId]).then(({ rows }) => {
+        if (rows.length === 0) {
+            return Promise.reject({
+                status: 404,
+                msg: "Not found",
+                desc: "No comment found with given ID",
+            });
+        }
+
+        rows[0].created_at = fixTimestamp(rows[0].created_at);
+
+        return rows[0];
+    });
+};
+
 exports.deleteComment = (commentId) => {
     const query = `
         DELETE FROM comments
