@@ -27,8 +27,29 @@
             ]
         }
     },
+    "POST /api/articles": {
+        "description": "adds an article to database",
+        "exampleBody": {
+            "author": "username",
+            "title": "a title",
+            "body": "article content",
+            "topic": "valid topic",
+            "article_img_url": "link to image (optional)"
+        },
+        "exampleResponse": {
+            "article_id": 10,
+            "author": "username",
+            "title": "a title",
+            "body": "article content",
+            "topic": "valid topic",
+            "article_img_url": "link to image (possible default)",
+            "created_at": "2024-02-23T14:53:25.060Z",
+            "votes": 0,
+            "comment_count": 0
+        }
+    },
     "GET /api/articles/:article_id": {
-        "description": "serves a single articles with given article_id",
+        "description": "serves a single article with given article_id",
         "exampleResponse": {
             "article": {
                 "article_id": 1,
@@ -79,10 +100,24 @@
             "body": "This is my comment."
         },
         "exampleResponse": {
-            "comment_id": 1,
+            "comment_id": 10,
             "body": "This is my comment.",
             "votes": 0,
             "author": "user123",
+            "article_id": 1,
+            "created_at": "2020-04-06T13:17:00.000Z"
+        }
+    },
+    "PATCH /api/comments/:comment_id": {
+        "description": "updates the vote count of comment with given comment_id",
+        "exampleBody": {
+            "inc_votes": 10
+        },
+        "exampleResponse": {
+            "comment_id": 1,
+            "body": "a comment",
+            "votes": 35,
+            "author": "username",
             "article_id": 1,
             "created_at": "2020-04-06T13:17:00.000Z"
         }
@@ -100,5 +135,13 @@
                 "avatar_url": "https://www.linktoimage.com/imageid.jpg"
             }
         ]
+    },
+    "GET /api/users/:username": {
+        "description": "serves a single user with given username",
+        "exampleResponse": {
+            "username": "user123",
+            "name": "john",
+            "avatar_url": "https://www.linktoimage.com/imageid.jpg"
+        }
     }
 }
