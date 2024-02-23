@@ -421,6 +421,7 @@ describe("/api/articles", () => {
                     .get("/api/articles?limit=5&p=1")
                     .expect(200)
                     .then(({ body: { articles, total_count } }) => {
+                        expect(articles[0].article_id).toBe(3);
                         expect(articles).toHaveLength(5);
                         expect(total_count).toBe(13);
                     });
@@ -431,6 +432,7 @@ describe("/api/articles", () => {
                     .get("/api/articles?limit=5&p=2")
                     .expect(200)
                     .then(({ body: { articles, total_count } }) => {
+                        expect(articles[0].article_id).toBe(5);
                         expect(articles).toHaveLength(5);
                         expect(total_count).toBe(13);
                     });
@@ -441,6 +443,7 @@ describe("/api/articles", () => {
                     .get("/api/articles?limit=5&p=3")
                     .expect(200)
                     .then(({ body: { articles, total_count } }) => {
+                        expect(articles[0].article_id).toBe(8);
                         expect(articles).toHaveLength(3);
                         expect(total_count).toBe(13);
                     });
