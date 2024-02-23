@@ -1,5 +1,4 @@
 const db = require("../db/connection");
-const { fixTimestamp } = require("./utils");
 
 exports.selectArticles = ({
     sorted_by = "created_at",
@@ -35,7 +34,7 @@ exports.selectArticles = ({
             desc: "Order must be 'asc' or 'desc'",
         });
     }
-    
+
     const valueArray = [];
     const queryArray = [];
 
@@ -61,10 +60,6 @@ exports.selectArticles = ({
     `;
 
     return db.query(query, valueArray).then(({ rows }) => {
-        rows.forEach((article) => {
-            article.created_at = fixTimestamp(article.created_at);
-        });
-
         return rows;
     });
 };
@@ -89,9 +84,7 @@ exports.selectArticleById = (article_id) => {
             });
         }
 
-        const article = rows[0];
-        article.created_at = fixTimestamp(article.created_at);
-        return article;
+        return rows[0];
     });
 };
 
@@ -111,8 +104,6 @@ exports.updateArticleVotes = (articleId, votes) => {
                 desc: "No article found with given ID",
             });
         }
-
-        rows[0].created_at = fixTimestamp(rows[0].created_at);
 
         return rows[0];
     });

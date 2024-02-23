@@ -42,7 +42,7 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
         topic VARCHAR NOT NULL REFERENCES topics(slug),
         author VARCHAR NOT NULL REFERENCES users(username),
         body VARCHAR NOT NULL,
-        created_at TIMESTAMP DEFAULT NOW(),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
         votes INT DEFAULT 0 NOT NULL,
         article_img_url VARCHAR DEFAULT 'https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700'
       );`);
@@ -55,7 +55,7 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
         article_id INT REFERENCES articles(article_id) NOT NULL,
         author VARCHAR REFERENCES users(username) NOT NULL,
         votes INT DEFAULT 0 NOT NULL,
-        created_at TIMESTAMP DEFAULT NOW()
+        created_at TIMESTAMPTZ DEFAULT NOW()
       );`);
     })
     .then(() => {

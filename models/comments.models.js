@@ -1,5 +1,4 @@
 const db = require("../db/connection");
-const { fixTimestamp } = require("./utils");
 
 exports.selectCommentByCommentId = (commentId) => {
     const query = `
@@ -28,10 +27,6 @@ exports.selectCommentsByArticleId = (articleId) => {
     `;
 
     return db.query(query, [articleId]).then(({ rows }) => {
-        rows.forEach((comment) => {
-            comment.created_at = fixTimestamp(comment.created_at);
-        });
-
         return rows;
     });
 };
@@ -66,8 +61,6 @@ exports.updateCommentVotes = (commentId, inc_votes) => {
                 desc: "No comment found with given ID",
             });
         }
-
-        rows[0].created_at = fixTimestamp(rows[0].created_at);
 
         return rows[0];
     });
