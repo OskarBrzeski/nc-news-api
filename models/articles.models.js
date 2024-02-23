@@ -88,6 +88,24 @@ exports.selectArticleById = (article_id) => {
     });
 };
 
+exports.insertArticle = ({ title, topic, author, body, article_img_url }) => {
+    const query = `
+    INSERT INTO articles
+        (title, topic, author, body, article_img_url)
+    VALUES
+        ($1, $2, $3, $4, $5)
+        RETURNING *
+    `;
+
+    return db
+        .query(query, [title, topic, author, body, article_img_url])
+        .then(({ rows }) => {
+            rows[0].comment_count = 0;
+            
+            return rows[0];
+        });
+};
+
 exports.updateArticleVotes = (articleId, votes) => {
     const query = `
         UPDATE articles

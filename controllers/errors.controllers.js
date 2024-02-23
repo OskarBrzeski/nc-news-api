@@ -37,6 +37,10 @@ exports.handleInvalidForeignKey = (err, req, res, next) => {
         let err_desc = "";
 
         switch (err.constraint) {
+            case "articles_topic_fkey":
+                err_desc = "No topic found with given slug";
+                break;
+            case "articles_author_fkey":
             case "comments_author_fkey":
                 err_desc = "No user found with given username";
                 break;
