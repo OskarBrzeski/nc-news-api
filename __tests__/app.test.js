@@ -352,6 +352,70 @@ describe("/api/articles", () => {
                     });
             });
         });
+
+        describe("?limit=", () => {
+            test("200: returns amount of articles specified in limit query", () => {
+                return request(app)
+                    .get("/api/articles?limit=5")
+                    .expect(200)
+                    .then(({ body: { articles, total_count } }) => {
+                        expect(articles).toHaveLength(5);
+                        expect(total_count).toBe(13);
+                    });
+            });
+
+            test("200: returns 10 articles if limit query not specified", () => {
+                return request(app)
+                    .get("/api/articles?limit=")
+                    .expect(200)
+                    .then(({ body: { articles, total_count } }) => {
+                        expect(articles).toHaveLength(10);
+                        expect(total_count).toBe(13);
+                    });
+            });
+
+            test("200: returns all articles if limit larger than number of articles", () => {
+                return request(app)
+                    .get("/api/articles?limit=100")
+                    .expect(200)
+                    .then(({ body: { articles, total_count } }) => {
+                        expect(articles).toHaveLength(13);
+                        expect(total_count).toBe(13);
+                    });
+            });
+
+            test("400: returns error if limit is set to 0", () => {
+                return request(app)
+                    .get("/api/articles?limit=0")
+                    .expect(400)
+                    .then(({ body: { msg, desc } }) => {
+                        expect(msg).toBe("Bad request");
+                        expect(desc).toBe("Cannot serve fewer than 1 article");
+                    });
+            });
+
+            test("400: returns error if limit is set to a negative number", () => {
+                return request(app)
+                    .get("/api/articles?limit=-5")
+                    .expect(400)
+                    .then(({ body: { msg, desc } }) => {
+                        expect(msg).toBe("Bad request");
+                        expect(desc).toBe("Cannot serve fewer than 1 article");
+                    });
+            });
+
+            test('400: returns error if limit is not a number', () => {
+                return request(app)
+                .get("/api/articles?limit=a")
+                .expect(400)
+                .then(({ body: {msg, desc}}) => {
+                        expect(msg).toBe("Bad request");
+                        expect(desc).toBe("Limit must be a number");
+                })
+            });
+        });
+
+        describe("?p=", () => {});
     });
 
     describe("POST", () => {
