@@ -387,6 +387,36 @@ describe("/api/articles", () => {
                 });
         });
 
+        test("201: successfully adds article with default img_url", () => {
+            const body = {
+                author: "rogersop",
+                title: "A new article",
+                body: "Some interesting words about whatever this article is about",
+                topic: "paper",
+            };
+
+            const expected = {
+                author: "rogersop",
+                title: "A new article",
+                body: "Some interesting words about whatever this article is about",
+                topic: "paper",
+                article_img_url:
+                    "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700",
+                article_id: expect.any(Number),
+                votes: 0,
+                created_at: expect.any(String),
+                comment_count: 0,
+            };
+
+            return request(app)
+                .post("/api/articles")
+                .send(body)
+                .expect(201)
+                .then(({ body: { article } }) => {
+                    expect(article).toMatchObject(expected);
+                });
+        });
+
         test("400: returns error when request body is missing attributes", () => {
             const body = {
                 author: "rogersop",

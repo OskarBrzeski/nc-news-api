@@ -89,21 +89,28 @@ exports.selectArticleById = (article_id) => {
 };
 
 exports.insertArticle = ({ title, topic, author, body, article_img_url }) => {
+    let fields = "(title, topic, author, body)";
+    let values = "($1, $2, $3, $4)";
+    const valueArray = [title, topic, author, body];
+    if (article_img_url !== undefined) {
+        fields = "(title, topic, author, body, article_img_url)";
+        values = "($1, $2, $3, $4, $5)";
+        valueArray.push(article_img_url);
+    }
+
     const query = `
     INSERT INTO articles
-        (title, topic, author, body, article_img_url)
+        ${fields}
     VALUES
-        ($1, $2, $3, $4, $5)
-        RETURNING *
+        ${values}
+    RETURNING *
     `;
 
-    return db
-        .query(query, [title, topic, author, body, article_img_url])
-        .then(({ rows }) => {
-            rows[0].comment_count = 0;
-            
-            return rows[0];
-        });
+    return db.query(query, valueArray).then(({ rows }) => {
+        rows[0].comment_count = 0;
+
+        return rows[0];
+    });
 };
 
 exports.updateArticleVotes = (articleId, votes) => {
