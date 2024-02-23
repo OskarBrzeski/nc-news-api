@@ -2,6 +2,7 @@ const {
     selectArticleById,
     selectArticles,
     updateArticleVotes,
+    insertArticle,
 } = require("../models/articles.models");
 const { selectTopicBySlug } = require("../models/topics.models");
 
@@ -30,6 +31,14 @@ exports.getArticleById = (req, res, next) => {
     selectArticleById(article_id)
         .then((article) => {
             res.status(200).send({ article });
+        })
+        .catch(next);
+};
+
+exports.postArticle = (req, res, next) => {
+    insertArticle(req.body)
+        .then((article) => {
+            res.status(201).send({ article });
         })
         .catch(next);
 };

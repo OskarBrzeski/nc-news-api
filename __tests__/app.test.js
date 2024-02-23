@@ -353,6 +353,129 @@ describe("/api/articles", () => {
             });
         });
     });
+
+    describe("POST", () => {
+        test("201: successfully add article", () => {
+            const body = {
+                author: "rogersop",
+                title: "A new article",
+                body: "Some interesting words about whatever this article is about",
+                topic: "paper",
+                article_img_url:
+                    "https://clipartcraft.com/images/thumbs-up-transparent-person-5.png",
+            };
+
+            const expected = {
+                author: "rogersop",
+                title: "A new article",
+                body: "Some interesting words about whatever this article is about",
+                topic: "paper",
+                article_img_url:
+                    "https://clipartcraft.com/images/thumbs-up-transparent-person-5.png",
+                article_id: expect.any(Number),
+                votes: 0,
+                created_at: expect.any(String),
+                comment_count: 0,
+            };
+
+            return request(app)
+                .post("/api/articles")
+                .send(body)
+                .expect(201)
+                .then(({ body: { article } }) => {
+                    expect(article).toMatchObject(expected);
+                });
+        });
+
+        test("201: successfully adds article with default img_url", () => {
+            const body = {
+                author: "rogersop",
+                title: "A new article",
+                body: "Some interesting words about whatever this article is about",
+                topic: "paper",
+            };
+
+            const expected = {
+                author: "rogersop",
+                title: "A new article",
+                body: "Some interesting words about whatever this article is about",
+                topic: "paper",
+                article_img_url:
+                    "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700",
+                article_id: expect.any(Number),
+                votes: 0,
+                created_at: expect.any(String),
+                comment_count: 0,
+            };
+
+            return request(app)
+                .post("/api/articles")
+                .send(body)
+                .expect(201)
+                .then(({ body: { article } }) => {
+                    expect(article).toMatchObject(expected);
+                });
+        });
+
+        test("400: returns error when request body is missing attributes", () => {
+            const body = {
+                author: "rogersop",
+                title: "A new article",
+                topic: "paper",
+                article_img_url:
+                    "https://clipartcraft.com/images/thumbs-up-transparent-person-5.png",
+            };
+
+            return request(app)
+                .post("/api/articles")
+                .send(body)
+                .expect(400)
+                .then(({ body: { msg, desc } }) => {
+                    expect(msg).toBe("Bad request");
+                    expect(desc).toBe("Missing attribute in request body");
+                });
+        });
+
+        test("404: returns error when request body references author that does not exist", () => {
+            const body = {
+                author: "cheese",
+                title: "A new article",
+                body: "Some interesting words about whatever this article is about",
+                topic: "paper",
+                article_img_url:
+                    "https://clipartcraft.com/images/thumbs-up-transparent-person-5.png",
+            };
+
+            return request(app)
+                .post("/api/articles")
+                .send(body)
+                .expect(404)
+                .then(({ body: { msg, desc } }) => {
+                    expect(msg).toBe("Not found");
+                    expect(desc).toBe("No user found with given username");
+                });
+        });
+
+        test("404: returns error when request body references topic that does not exist", () => {
+            const body = {
+                author: "rogersop",
+                title: "A new article",
+                body: "Some interesting words about whatever this article is about",
+                topic: "rock",
+                article_img_url:
+                    "https://clipartcraft.com/images/thumbs-up-transparent-person-5.png",
+            };
+
+            return request(app)
+                .post("/api/articles")
+                .send(body)
+                .expect(404)
+                .then(({ body: { msg, desc } }) => {
+                    expect(msg).toBe("Not found");
+                    expect(desc).toBe("No topic found with given slug");
+                });
+        });
+    });
 });
 
 describe("/api/articles/:article_id", () => {
