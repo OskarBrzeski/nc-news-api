@@ -3,6 +3,8 @@ const db = require("../db/connection");
 exports.selectArticles = ({
     sorted_by = "created_at",
     order = "desc",
+    limit,
+    p,
     ...queryObj
 }) => {
     const validSorts = [
@@ -49,18 +51,72 @@ exports.selectArticles = ({
     }
 
     const query = `
-        SELECT a.author, a.title, a.article_id, a.topic,
-        a.created_at, a.votes, a.article_img_url,
-        CAST(COUNT(c.article_id) AS INTEGER) AS comment_count
-        FROM articles AS a
-        LEFT JOIN comments AS c ON a.article_id = c.article_id
-        ${whereClause}
-        GROUP BY a.article_id
-        ORDER BY ${sorted_by} ${order};
+    SELECT a.author, a.title, a.article_id, a.topic,
+    a.created_at, a.votes, a.article_img_url,
+    CAST(COUNT(c.article_id) AS INTEGER) AS comment_count
+    FROM articles AS a
+    LEFT JOIN comments AS c ON a.article_id = c.article_id
+    ${whereClause}
+    GROUP BY a.article_id
+    ORDER BY ${sorted_by} ${order};
     `;
 
     return db.query(query, valueArray).then(({ rows }) => {
-        return rows;
+        if (limit === undefined) {
+            if (p !== undefined) {
+                return Promise.reject({
+                    status: 400,
+                    msg: "Bad request",
+                    desc: "Cannot serve page without limit",
+                });
+            }
+            return { articles: rows };
+        } else if (limit === "") {
+            limit = 10;
+        } else {
+            limit = Number(limit);
+        }
+
+        if (isNaN(limit)) {
+            return Promise.reject({
+                status: 400,
+                msg: "Bad request",
+                desc: "Limit must be a number",
+            });
+        } else if (limit <= 0) {
+            return Promise.reject({
+                status: 400,
+                msg: "Bad request",
+                desc: "Cannot serve fewer than 1 article",
+            });
+        }
+
+        let page;
+
+        if (p === undefined) {
+            page = 1;
+        } else if (p === "" || isNaN(Number(p))) {
+            return Promise.reject({
+                status: 400,
+                msg: "Bad request",
+                desc: "Page must be a number",
+            });
+        } else {
+            page = Number(p);
+        }
+
+        if (page <= 0 || (limit * (page - 1) + 1) > rows.length) {
+            return Promise.reject({
+                status: 400,
+                msg: "Bad request",
+                desc: "Cannot serve requested page",
+            });
+        }
+
+        return {
+            articles: rows.slice(limit * (page - 1), limit * page),
+            total_count: rows.length,
+        };
     });
 };
 

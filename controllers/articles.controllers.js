@@ -20,7 +20,7 @@ exports.getArticles = (req, res, next) => {
             return outcomes[outcomes.length - 1];
         })
         .then((articles) => {
-            res.status(200).send({ articles });
+            res.status(200).send(articles);
         })
         .catch(next);
 };
