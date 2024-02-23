@@ -4,6 +4,7 @@ exports.selectArticles = ({
     sorted_by = "created_at",
     order = "desc",
     limit,
+    p,
     ...queryObj
 }) => {
     const validSorts = [
@@ -62,18 +63,27 @@ exports.selectArticles = ({
 
     return db.query(query, valueArray).then(({ rows }) => {
         if (limit === undefined) {
+            if (p !== undefined) {
+                return Promise.reject({
+                    status: 400,
+                    msg: "Bad request",
+                    desc: "Cannot serve page without limit",
+                });
+            }
             return { articles: rows };
         } else if (limit === "") {
             limit = 10;
+        } else {
+            limit = Number(limit);
         }
 
-        if (isNaN(Number(limit))) {
+        if (isNaN(limit)) {
             return Promise.reject({
                 status: 400,
                 msg: "Bad request",
                 desc: "Limit must be a number",
             });
-        } else if (Number(limit) <= 0) {
+        } else if (limit <= 0) {
             return Promise.reject({
                 status: 400,
                 msg: "Bad request",
@@ -81,8 +91,30 @@ exports.selectArticles = ({
             });
         }
 
+        let page;
+
+        if (p === undefined) {
+            page = 1;
+        } else if (p === "" || isNaN(Number(p))) {
+            return Promise.reject({
+                status: 400,
+                msg: "Bad request",
+                desc: "Page must be a number",
+            });
+        } else {
+            page = Number(p);
+        }
+
+        if (page <= 0 || (limit * (page - 1) + 1) > rows.length) {
+            return Promise.reject({
+                status: 400,
+                msg: "Bad request",
+                desc: "Cannot serve requested page",
+            });
+        }
+
         return {
-            articles: rows.slice(0, Number(limit)),
+            articles: rows.slice(limit * (page - 1), limit * page),
             total_count: rows.length,
         };
     });
